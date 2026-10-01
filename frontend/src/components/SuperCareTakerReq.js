@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Api from "../api/Api";
+import { Link } from "react-router-dom";
+import LogoutButton from "./LogoutButton";
 
 export default function CaretakerRequests() {
 
@@ -88,47 +90,30 @@ justify-between
 ">
 
 
-          <div className="
-text-center 
-md:text-left
-">
-
-
-            <h1 className="
-flex
-items-center
-gap-3
-text-3xl
-md:text-5xl
-font-extrabold
-text-green-900
-">
-
+          <Link to="/" className="text-center md:text-left cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+            <h1 className="flex items-center gap-3 text-3xl md:text-5xl font-extrabold text-green-900">
               <img
                 src="/garbageVehicle.jpeg"
-                alt="logo"
-                className="w-12 h-12"
+                alt="CleanTrack"
+                className="w-12 h-12 object-contain"
               />
-
-
               CleanTrack
-
-
             </h1>
 
-
-            <p className="
-text-gray-800 
-mt-1
-">
-
+            <p className="text-gray-800 mt-1">
               Smart Waste Management Control Center
-
             </p>
+          </Link>
 
-
+          <div className="flex items-center gap-3 mt-3 md:mt-0">
+            <Link
+              to="/supervisor-dashboard"
+              className="bg-green-800 hover:bg-green-900 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm md:text-base"
+            >
+              Supervisor Dashboard
+            </Link>
+            <LogoutButton />
           </div>
-
 
         </div>
 

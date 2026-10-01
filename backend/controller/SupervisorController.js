@@ -46,14 +46,21 @@ await supervisor.save();
 
 export const getSupervisorLocations = async (req, res) => {
   try {
-    const supervisor = await User.findById(req.params.id);
+    const { id } = req.params;
+    if (!id || id === "null" || id === "undefined" || id.length !== 24) {
+      return res.status(200).json([]);
+    }
+
+    const supervisor = await User.findById(id);
+    if (!supervisor || !supervisor.zone) {
+      return res.status(200).json([]);
+    }
 
     const locations = await Location.find({
-      zone: supervisor.zone,
+      zone: { $regex: new RegExp(`^${supervisor.zone.trim()}$`, "i") },
     });
 
     res.status(200).json(locations);
-
   } catch (error) {
     res.status(500).json({
       message: error.message,

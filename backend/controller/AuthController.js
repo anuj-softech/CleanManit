@@ -11,105 +11,106 @@ dotenv.config();
 
 export const sendOtp = async (req, res) => {
 
-try {
+    try {
 
-const { email } = req.body;
-
-
-const user = await User.findOne({email});
+        const {email} = req.body;
 
 
-if(!user){
+        const user = await User.findOne({email});
 
-return res.status(404).json({
-success:false,
-message:"User not found"
-});
 
-}
+        if (!user) {
+
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+
+        }
 
 
 // ================= OTP EXIST CHECK =================
 
 
-if(
- user.otp &&
- user.otpCreatedAt
-){
+        if (
+            user.otp &&
+            user.otpCreatedAt
+        ) {
 
-const currentTime = new Date();
+            const currentTime = new Date();
 
-const diff =
-(currentTime - user.otpCreatedAt)
-/
-(1000 * 60); // minutes
+            const diff =
+                (currentTime - user.otpCreatedAt)
+                /
+                (1000 * 60); // minutes
 
 
-if(diff < 10){
+            if (diff < 10) {
 
-return res.status(200).json({
+                return res.status(200).json({
 
-success:true,
+                    success: true,
 
-message:
-"OTP already sent. Please use previous OTP",
+                    message:
+                        "OTP already sent. Please use previous OTP",
 
-});
+                });
 
-}
+            }
 
-}
-
+        }
 
 
 // ================= CREATE NEW OTP =================
 
 
-const otp =
-Math.floor(
-100000 +
-Math.random()*900000
-).toString();
+        const otp =
+            Math.floor(
+                100000 +
+                Math.random() * 900000
+            ).toString();
 
 
+        user.otp = otp;
 
-user.otp = otp;
-
-user.otpCreatedAt = new Date();
-
-
-await user.save();
+        user.otpCreatedAt = new Date();
 
 
+        await user.save();
+        return res.status(200).json({
 
+            success: true,
+
+            message: "OTP Sent Successfully" + otp
+
+        });
 
 // ================= SEND MAIL =================
 
 
-await axios.post(
+        await axios.post(
+            "https://api.brevo.com/v3/smtp/email",
 
-"https://api.brevo.com/v3/smtp/email",
+            {
 
-{
-
-sender:{
-name:"CleanTrack",
-email:"jyotipatewar2004@gmail.com"
-},
-
-
-to:[
-{
-email:user.email,
-name:user.name
-}
-],
+                sender: {
+                    name: "CleanTrack",
+                    email: "jyotipatewar2004@gmail.com"
+                },
 
 
-subject:"CleanTrack OTP Verification",
+                to: [
+                    {
+                        email: user.email,
+                        name: user.name
+                    }
+                ],
 
 
-htmlContent:`
+                subject: "CleanTrack OTP Verification",
+
+
+                htmlContent: `
 
 <div style="font-family:Arial;padding:20px">
 
@@ -131,56 +132,52 @@ OTP valid for 10 minutes.
 
 `
 
-},
+            },
 
-{
+            {
 
-headers:{
+                headers: {
 
-accept:"application/json",
+                    accept: "application/json",
 
-"api-key":
-process.env.BREVO_API_KEY,
+                    "api-key":
+                    process.env.BREVO_API_KEY,
 
-"content-type":
-"application/json"
+                    "content-type":
+                        "application/json"
 
-}
+                }
 
-}
-
-);
-
+            }
+        );
 
 
-return res.status(200).json({
+        return res.status(200).json({
 
-success:true,
+            success: true,
 
-message:"OTP Sent Successfully"
+            message: "OTP Sent Successfully"
 
-});
-
-
-}
-
-catch(error){
-
-console.log(
-error.response?.data ||
-error.message
-);
+        });
 
 
-return res.status(500).json({
+    } catch (error) {
 
-success:false,
+        console.log(
+            error.response?.data ||
+            error.message
+        );
 
-message:error.message
 
-});
+        return res.status(500).json({
 
-}
+            success: false,
+
+            message: error.message
+
+        });
+
+    }
 
 
 };
@@ -190,79 +187,136 @@ message:error.message
 // ======================
 
 export const verifyOtp = async (req, res) => {
-  try {
+    try {
 
-    const { email, otp } = req.body;
+        const {email, otp} = req.body;
 
-    const user = await User.findOne({ email });
+        const user = await User.findOne({email});
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
 
-   if(user.otp !== otp){
+        if (user.otp !== otp) {
 
-  return res.status(400).json({
-    success:false,
-    message:"Invalid OTP",
-  });
+            return res.status(400).json({
+                success: false,
+                message: "Invalid OTP",
+            });
 
-}
+        }
 
 
 // Check OTP expiry
 
-const currentTime = new Date();
+        const currentTime = new Date();
 
-const diff =
-(currentTime - user.otpCreatedAt) / (1000 * 60);
+        const diff =
+            (currentTime - user.otpCreatedAt) / (1000 * 60);
 
 
-if(diff > 10){
+        if (diff > 10) {
 
-  return res.status(400).json({
-    success:false,
-    message:"OTP expired. Please request new OTP."
-  });
+            return res.status(400).json({
+                success: false,
+                message: "OTP expired. Please request new OTP."
+            });
 
-}
+        }
 
-user.isVerified = true;
-user.otp = "";
-user.otpCreatedAt = null;
+        user.isVerified = true;
+        user.otp = "";
+        user.otpCreatedAt = null;
 
-await user.save();
+        await user.save();
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "30d",
-      }
-    );
+        const token = jwt.sign(
+            {
+                id: user._id,
+                role: user.role,
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "30d",
+            }
+        );
 
-    return res.status(200).json({
-      success: true,
-      message: "Login Successful",
-      token,
-      role: user.role,
-      id: user._id,
-      user,
-    });
+        // ================= SET HTTP-ONLY COOKIE =================
+        // sameSite: "none" and secure: true allow cross-port cookie transmission (e.g. port 3000 -> 5000)
+        // Chrome treats localhost as a secure origin, so secure: true works on local HTTP
+        const cookieOptions = {
+            httpOnly: true, // Prevents JavaScript from reading the cookie
+            secure: true,   // Required for sameSite: "none" (Chrome supports this on localhost)
+            sameSite: "none", // Enables cross-port/cross-site cookie transmission
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        };
 
-  } catch (error) {
+        res.cookie("token", token, cookieOptions);
 
-    console.log(error);
+        return res.status(200).json({
+            success: true,
+            message: "Login Successful",
+            role: user.role,
+            id: user._id,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                mobile: user.mobile,
+            },
+        });
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+    } catch (error) {
+
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// ======================
+// LOGOUT (CLEAR COOKIE)
+// ======================
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
+// ======================
+// GET CURRENT USER (ME)
+// ======================
+export const getMe = async (req, res) => {
+    try {
+        return res.status(200).json({
+            success: true,
+            user: req.user,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };    

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Api from "../api/Api";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 export default function DriverDashboard() {
 
@@ -99,12 +100,12 @@ export default function DriverDashboard() {
       <div className="bg-[#4CBB17]/40 px-4 md:px-8 py-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
 
-          <div className="text-center md:text-left">
+          <Link to="/" className="text-center md:text-left cursor-pointer hover:opacity-90 transition block" title="Go to Home">
             <h1 className="flex items-center justify-center md:justify-start gap-2 md:gap-3 text-2xl sm:text-3xl md:text-5xl font-extrabold text-green-900">
               <img
-                src="garbageVehicle.jpeg"
+                src="/garbageVehicle.jpeg"
                 alt="logo"
-                className="w-10 h-10 md:w-16 md:h-16"
+                className="w-10 h-10 md:w-16 md:h-16 object-contain"
               />
               CleanTrack
             </h1>
@@ -112,14 +113,17 @@ export default function DriverDashboard() {
             <p className="text-xs sm:text-sm md:text-base text-gray-800 mt-1">
               Smart Waste Management Control Center
             </p>
-          </div>
-
-          <Link
-            to="/driver-completed-tasks"
-            className="bg-green-700 text-white px-5 py-2 rounded-xl hover:bg-green-800 transition"
-          >
-            Completed Tasks
           </Link>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/driver-completed-tasks"
+              className="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2 rounded-xl transition shadow"
+            >
+              Completed Tasks
+            </Link>
+            <LogoutButton />
+          </div>
 
         </div>
       </div>

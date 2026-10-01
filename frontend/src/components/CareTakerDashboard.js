@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import LogoutButton from "./LogoutButton";
 
 export default function CareTakerDashboard() {
 
@@ -153,26 +154,26 @@ export default function CareTakerDashboard() {
 
         <div className="min-h-screen bg-[#4CBB17]/20">
 
+            <div className="bg-[#4CBB17]/40 px-4 py-4 lg:px-8 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-            <div className="bg-[#4CBB17]/40 px-4 py-4 lg:px-8 mb-6">
+                <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+                    <h1 className="flex items-center gap-3 text-3xl lg:text-5xl font-extrabold text-green-900">
+                        <img
+                            src="/garbageVehicle.jpeg"
+                            alt="CleanTrack Logo"
+                            className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+                        />
+                        CleanTrack
+                    </h1>
 
+                    <p className="text-gray-800 mt-2">
+                        Smart Waste Management Control Center
+                    </p>
+                </Link>
 
-                <h1 className="flex items-center gap-3 text-3xl lg:text-5xl font-extrabold text-green-900">
-
-                    <img
-                        src="/garbageVehicle.jpeg"
-                        className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
-                    />
-
-                    CleanTrack
-
-                </h1>
-
-
-                <p className="text-gray-800 mt-2">
-                    Smart Waste Management Control Center
-                </p>
-
+                <div className="flex items-center">
+                    <LogoutButton />
+                </div>
 
             </div>
 

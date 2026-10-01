@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -55,19 +56,31 @@ const SignUp = () => {
     <div className="min-h-screen bg-[#4CBB17]/20">
 
       {/* Header */}
-      <div className="bg-[#4CBB17]/40 px-8 py-4 shadow-md">
-        <h1 className="flex items-center gap-3 text-4xl font-extrabold text-green-900">
-          <img
-            src="/garbageVehicle.jpeg"
-            alt="CleanTrack Logo"
-            className="w-14 h-14 object-contain"
-          />
-          CleanTrack
-        </h1>
+      <div className="bg-[#4CBB17]/40 px-4 py-4 sm:px-8 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+          <h1 className="flex items-center gap-3 text-3xl sm:text-4xl font-extrabold text-green-900">
+            <img
+              src="/garbageVehicle.jpeg"
+              alt="CleanTrack Logo"
+              className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
+            />
+            CleanTrack
+          </h1>
 
-        <p className="text-gray-800 mt-1">
-          Smart Waste Management Control Center
-        </p>
+          <p className="text-gray-800 mt-1 text-sm sm:text-base">
+            Smart Waste Management Control Center
+          </p>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to="/admin"
+            className="bg-green-800 hover:bg-green-900 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm sm:text-base"
+          >
+            Admin Dashboard
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       {/* Signup Card */}

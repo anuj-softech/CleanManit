@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 function LocationCreatedashboard() {
 
@@ -122,34 +123,33 @@ function LocationCreatedashboard() {
     <div className="min-h-screen bg-[#4CBB17]/20">
 
       {/* Header */}
-      <div className="bg-[#4CBB17]/40 px-6 py-4">
-
-        <div className="flex items-center justify-between">
-
-          <div>
-            <h1 className="flex items-center gap-3 text-5xl font-extrabold text-green-900">
+      <div className="bg-[#4CBB17]/40 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+            <h1 className="flex items-center gap-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900">
               <img
                 src="/garbageVehicle.jpeg"
-                alt=""
-                className="w-16 h-16 object-contain"
+                alt="CleanTrack"
+                className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
               />
               CleanTrack
             </h1>
 
-            <p className="text-gray-800 mt-2">
+            <p className="text-gray-800 mt-2 text-sm sm:text-base">
               Smart Waste Management Control Center
             </p>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/admin"
+              className="bg-green-800 hover:bg-green-900 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm sm:text-base"
+            >
+              Admin Dashboard
+            </Link>
+            <LogoutButton />
           </div>
-
-          {/* <Link
-            to="/admin"
-            className="bg-green-900 text-white px-5 py-2 rounded-xl hover:bg-green-800"
-          >
-            Back To Dashboard
-          </Link> */}
-
         </div>
-
       </div>
 
       {/* Page Title */}

@@ -1,13 +1,21 @@
 import express from "express";
-import { createLocation, getAllLocations, getLocationsByZone,getSingleLocation,updateLocation,deleteLocation} from "../controller/LocationController.js";
+import {
+  createLocation,
+  getAllLocations,
+  getLocationsByZone,
+  getSingleLocation,
+  updateLocation,
+  deleteLocation,
+} from "../controller/LocationController.js";
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/create", createLocation);
-router.get("/all", getAllLocations);
-router.get("/get-location-by-zone/:zone", getLocationsByZone);
-router.get("/single/:id", getSingleLocation);
-router.put("/update/:id", updateLocation);
-router.delete("/delete/:id", deleteLocation);
+router.post("/create", protect, authorize("admin"), createLocation);
+router.get("/all", protect, getAllLocations);
+router.get("/get-location-by-zone/:zone", protect, authorize("admin", "supervisor"), getLocationsByZone);
+router.get("/single/:id", protect, getSingleLocation);
+router.put("/update/:id", protect, authorize("admin"), updateLocation);
+router.delete("/delete/:id", protect, authorize("admin"), deleteLocation);
 
 export default router;

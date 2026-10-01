@@ -1,13 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
 
 function Login() {
-
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // Auto-redirect to designated dashboard if user already has a valid cookie
+  useEffect(() => {
+    const checkActiveSession = async () => {
+      try {
+        const res = await axios.get(Api.get_me);
+        if (res.data?.success && res.data?.user) {
+          const user = res.data.user;
+          localStorage.setItem("id", user._id);
+          localStorage.setItem("role", user.role);
+
+          const role = user.role?.toLowerCase();
+          if (role === "admin") {
+            window.location.replace("/admin");
+            return;
+          } else if (role === "supervisor") {
+            window.location.replace("/supervisor-dashboard");
+            return;
+          } else if (role === "caretaker") {
+            window.location.replace(`/caretaker/${user._id}`);
+            return;
+          } else if (role === "driver") {
+            window.location.replace("/driver-dashboard");
+            return;
+          }
+        }
+      } catch (err) {
+        // No active cookie session; stay on login page
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+
+    checkActiveSession();
+  }, []);
 
   const sendOtp = async () => {
     try {
@@ -41,19 +76,10 @@ function Login() {
           otp,
         }
       );
-      localStorage.setItem(
-        "id",
-        res.data.user._id
-      );
-      localStorage.setItem(
-        "token",
-        res.data.token
-      );
-
-      localStorage.setItem(
-        "role",
-        res.data.role
-      );
+      // Keep role and user id in localStorage for frontend UI and navigation knowledge
+      localStorage.setItem("id", res.data.id || res.data.user?._id);
+      localStorage.setItem("role", res.data.role);
+      localStorage.removeItem("token"); // Token is securely held in HTTP-only cookie
 
       toast.success("Login Successful");
       setTimeout(() => {
@@ -79,6 +105,21 @@ function Login() {
 
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen bg-[#4CBB17]/20 flex flex-col items-center justify-center p-4">
+        <img
+          src="/garbageVehicle.jpeg"
+          alt="CleanTrack"
+          className="w-16 h-16 object-contain animate-bounce mb-4"
+        />
+        <p className="text-green-900 font-bold text-lg animate-pulse">
+          Verifying session...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#4CBB17]/20">

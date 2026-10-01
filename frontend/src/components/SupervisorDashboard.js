@@ -3,10 +3,12 @@ import axios from "axios";
 import Api from "../api/Api";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 export default function SupervisorDashboard() {
 
   const [locations, setLocations] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [statusFilter, setStatusFilter] = useState("All");
@@ -16,69 +18,56 @@ export default function SupervisorDashboard() {
   const [myRequests, setMyRequests] = useState([]);
 
 
-  const supervisorId = localStorage.getItem("id");
+  const [supervisorId, setSupervisorId] = useState(
+    () => localStorage.getItem("id") || ""
+  );
 
-
-  const getLocations = useCallback(async () => {
+  const getLocations = useCallback(async (id) => {
+    const targetId = id || supervisorId || localStorage.getItem("id");
+    if (!targetId) {
+      setLoadingLocations(false);
+      return;
+    }
     try {
+      setLoadingLocations(true);
       const res = await axios.get(
-        `${Api.get_Supervisor_Locations}/${supervisorId}`
+        `${Api.get_Supervisor_Locations}/${targetId}`
       );
-      console.log(res.data)
-      setLocations(res.data);
+      const data = Array.isArray(res.data) ? res.data : (res.data?.locations || []);
+      setLocations(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.log(err);
+      console.error("Failed to load zone locations:", err);
+      setLocations([]);
+    } finally {
+      setLoadingLocations(false);
     }
   }, [supervisorId]);
 
-
-
-  const getMyRequests = useCallback(async () => {
-
-    try {
-
-      setLoading(true);
-
-      const res = await axios.get(
-        `${Api.get_My_Emg_Req}/${supervisorId}`
-      );
-
-      console.log("MY REQUEST RESPONSE =>", res.data);
-
-      const data = res.data?.data || res.data || [];
-
-
-      const filtered = data.filter((req) => {
-
-        const createdBy =
-          req.requestedBy?._id || req.requestedBy;
-
-        return createdBy?.toString() === supervisorId?.toString();
-
-      });
-
-
-      console.log("ONLY SUPERVISOR REQUESTS =>", filtered);
-
-
-      setMyRequests(filtered);
-
-
-    }
-    catch (err) {
-
-      console.log(err);
-
-      setMyRequests([]);
-
-    }
-    finally {
-
+  const getMyRequests = useCallback(async (id) => {
+    const targetId = id || supervisorId || localStorage.getItem("id");
+    if (!targetId) {
       setLoading(false);
-
+      return;
     }
-
-
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `${Api.get_My_Emg_Req}/${targetId}`
+      );
+      const data = res.data?.data || res.data || [];
+      const filtered = Array.isArray(data)
+        ? data.filter((req) => {
+            const createdBy = req.requestedBy?._id || req.requestedBy;
+            return createdBy?.toString() === targetId?.toString();
+          })
+        : [];
+      setMyRequests(filtered);
+    } catch (err) {
+      console.log(err);
+      setMyRequests([]);
+    } finally {
+      setLoading(false);
+    }
   }, [supervisorId]);
 
 
@@ -202,9 +191,47 @@ export default function SupervisorDashboard() {
 
 
   useEffect(() => {
-    getLocations();
-    getMyRequests();
-  }, [getLocations, getMyRequests]);
+    let isMounted = true;
+
+    const init = async () => {
+      let currentId = supervisorId || localStorage.getItem("id");
+      if (!currentId) {
+        try {
+          const res = await axios.get(Api.get_me);
+          if (res.data?.user?._id) {
+            currentId = res.data.user._id;
+            if (isMounted) {
+              setSupervisorId(currentId);
+            }
+            localStorage.setItem("id", currentId);
+            if (res.data.user.role) {
+              localStorage.setItem("role", res.data.user.role);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to verify supervisor session:", e);
+        }
+      }
+
+      if (currentId) {
+        await Promise.all([
+          getLocations(currentId),
+          getMyRequests(currentId),
+        ]);
+      } else {
+        if (isMounted) {
+          setLoading(false);
+          setLoadingLocations(false);
+        }
+      }
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getLocations, getMyRequests, supervisorId]);
   return (
 
     <div className="min-h-screen bg-[#4CBB17]/20">
@@ -215,14 +242,12 @@ export default function SupervisorDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
           {/* Logo + Title */}
-          <div className="flex items-center gap-3">
-
+          <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition" title="Go to Home">
             <img
-              src="garbageVehicle.jpeg"
+              src="/garbageVehicle.jpeg"
               alt="CleanTrack Logo"
               className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain"
             />
-
 
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900 ">
@@ -232,21 +257,21 @@ export default function SupervisorDashboard() {
               <p className="text-gray-900 text-sm sm:text-base">
                 Smart Waste Management Control Center
               </p>
-
             </div>
-
-          </div>
-
-
-
-          {/* Caretaker Button */}
-          <Link
-            to="/caretaker-requests"
-            className="bg-green-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl-bold shadow-lg text-center text-sm sm:text-base"
-          >
-            👤 View Caretaker Requests
           </Link>
 
+
+
+          {/* Header Action Buttons */}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              to="/caretaker-requests"
+              className="bg-green-800 hover:bg-green-900 text-white font-semibold px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl shadow-md text-center text-sm sm:text-base transition"
+            >
+              👤 View Caretaker Requests
+            </Link>
+            <LogoutButton />
+          </div>
 
         </div>
 
@@ -267,50 +292,57 @@ export default function SupervisorDashboard() {
               Create Pickup Request
             </h2>
 
-            {/* Location */}
+            {/* Location in Assigned Zone */}
             <div className="mb-5">
-              <label className="font-semibold block mb-2">
-                Location
+              <label className="font-semibold block mb-2 text-gray-800">
+                Select Location in Your Zone
               </label>
 
-              <input
-                className="w-full border rounded-xl p-3"
-                placeholder="Search pickup address..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setShowDropdown(true);
-                }}
-              //                 onFocus={() => setShowDropdown(true)}
-              // onBlur={() => {
-              //   setTimeout(() => {
-              //     setShowDropdown(false);
-              //   }, 200);
-              // }}
-              />
-
-              {showDropdown && (
-                <div className="border rounded-xl mt-2 max-h-40 overflow-y-auto">
-                  {locations
-                    .filter((l) =>
-                      l.locationName
-                        ?.toLowerCase()
-                        .includes(search.toLowerCase())
-                    )
-                    .map((loc) => (
-                      <div
-                        key={loc._id}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setSearch(loc.locationName);
-                          setShowDropdown(false);
-                        }}
-                        className="p-3 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {loc.locationName}
-                      </div>
-                    ))}
+              {loadingLocations ? (
+                <div className="w-full border border-gray-200 bg-gray-50 rounded-xl p-3 text-sm text-gray-600 flex items-center gap-2">
+                  <span className="inline-block animate-spin text-base">⏳</span>
+                  <span className="font-medium">Loading locations for your zone...</span>
                 </div>
+              ) : (
+                <select
+                  className="w-full border border-gray-300 rounded-xl p-3 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 font-medium text-gray-800"
+                  value={selectedLocation?._id || ""}
+                  onChange={(e) => {
+                    const loc = locations.find((l) => l._id === e.target.value);
+                    setSelectedLocation(loc || null);
+                  }}
+                >
+                  <option value="">
+                    {locations.length > 0
+                      ? "-- Select Location --"
+                      : "-- No Locations Assigned to Your Zone --"}
+                  </option>
+                  {locations
+                    .slice()
+                    .sort((a, b) => (a.locationName || "").localeCompare(b.locationName || ""))
+                    .map((loc) => (
+                      <option key={loc._id} value={loc._id}>
+                        {loc.locationName}
+                      </option>
+                    ))}
+                </select>
+              )}
+
+              {selectedLocation && (
+                <div className="mt-2 text-xs font-semibold text-green-900 bg-green-50 border border-green-200 rounded-lg p-2.5 flex items-center justify-between">
+                  <span>Selected: {selectedLocation.locationName}</span>
+                  {selectedLocation.zone && (
+                    <span className="bg-green-200 text-green-900 px-2 py-0.5 rounded-full text-[11px]">
+                      {selectedLocation.zone}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {!loadingLocations && !loading && locations.length === 0 && (
+                <p className="text-xs text-amber-700 mt-2 font-medium">
+                  ⚠️ No locations found for your assigned zone. Please ask Admin to assign locations to your zone.
+                </p>
               )}
             </div>
 
@@ -452,7 +484,7 @@ export default function SupervisorDashboard() {
               </p> */}
 
                               <h3 className="text-xl font-semibold text-red-700">
-                                📍 {req.location?.locationName}
+                                {req.location?.locationName}
                               </h3>
 
                               <div className="flex justify-between items-center mt-4">
@@ -519,7 +551,7 @@ export default function SupervisorDashboard() {
             </p> */}
 
                               <h3 className="text-xl font-semibold text-green-800">
-                                📍 {req.location?.locationName}
+                                {req.location?.locationName}
                               </h3>
 
                               <div className="flex justify-between items-center mt-4">

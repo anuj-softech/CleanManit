@@ -3,7 +3,16 @@ import Location from "../models/Location.js";
 
 export const createUser = async (req, res) => {
   try {
-    const { name, mobile, email, role,locations,zone  } = req.body;
+    const { name, mobile, email, role, locations, zone } = req.body;
+
+    // Admin accounts can ONLY be created via direct server terminal SSH access
+    const allowedRoles = ["supervisor", "caretaker", "driver"];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role. Only 'supervisor', 'caretaker', or 'driver' can be created here. Admin accounts can only be provisioned via server terminal CLI.",
+      });
+    }
 
     const existingUser = await User.findOne({
       $or: [{ mobile }, { email }],

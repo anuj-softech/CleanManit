@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import LogoutButton from "./LogoutButton";
 
 export default function DriverCompletedTasks() {
   const [tasks, setTasks] = useState([]);
@@ -27,10 +29,10 @@ export default function DriverCompletedTasks() {
 
   return (
     <>
-      <div className="bg-[#4CBB17]/40 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3">
+      <div className="bg-[#4CBB17]/40 px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition" title="Go to Home">
           <img
-            src="garbageVehicle.jpeg"
+            src="/garbageVehicle.jpeg"
             alt="CleanTrack Logo"
             className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 object-contain"
           />
@@ -44,6 +46,16 @@ export default function DriverCompletedTasks() {
               Smart Waste Management Control Center
             </p>
           </div>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to="/driver-dashboard"
+            className="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm sm:text-base"
+          >
+            Driver Dashboard
+          </Link>
+          <LogoutButton />
         </div>
       </div>
       <div className="min-h-screen bg-[#4CBB17]/20 p-8 ">

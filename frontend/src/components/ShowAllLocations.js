@@ -2,7 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import LogoutButton from "./LogoutButton";
 
 export default function ShowAllLocations() {
   const [zone, setZone] = useState("");
@@ -154,18 +155,30 @@ export default function ShowAllLocations() {
     <div className="min-h-screen bg-green-100">
 
       {/* HEADER */}
-      <div className="mb-6 bg-[#4CBB17]/40 px-4 py-3 lg:px-8">
-        <h1 className="flex items-center justify-center lg:justify-start gap-3 text-3xl lg:text-5xl font-extrabold text-green-900">
-          <img
-            src="garbageVehicle.jpeg"
-            className="w-12 h-12 lg:w-16 lg:h-16"
-            alt=""
-          />
-          CleanTrack
-        </h1>
-        <p className="text-gray-900 mt-1 text-center lg:text-left">
-          Smart Waste Management Control Center
-        </p>
+      <div className="mb-6 bg-[#4CBB17]/40 px-4 py-3 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+          <h1 className="flex items-center justify-center lg:justify-start gap-3 text-3xl lg:text-5xl font-extrabold text-green-900">
+            <img
+              src="/garbageVehicle.jpeg"
+              className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+              alt="CleanTrack"
+            />
+            CleanTrack
+          </h1>
+          <p className="text-gray-900 mt-1 text-center lg:text-left text-sm sm:text-base">
+            Smart Waste Management Control Center
+          </p>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to="/admin"
+            className="bg-green-800 hover:bg-green-900 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm sm:text-base"
+          >
+            Admin Dashboard
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       {/* TITLE */}

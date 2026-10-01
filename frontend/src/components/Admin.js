@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 function Admin() {
   const [users, setUsers] = useState([])
@@ -73,11 +74,11 @@ function Admin() {
           <div className="flex items-center justify-between">
 
             {/* Logo */}
-            <div>
+            <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
               <h1 className="flex items-center gap-2 md:gap-3 text-3xl md:text-5xl font-extrabold text-green-900">
                 <img
                   src="/garbageVehicle.jpeg"
-                  alt=""
+                  alt="CleanTrack"
                   className="w-10 h-10 md:w-16 md:h-16 object-contain"
                 />
                 CleanTrack
@@ -86,7 +87,7 @@ function Admin() {
               <p className="text-gray-900 text-xs md:text-base mt-1">
                 Smart Waste Management Control Center
               </p>
-            </div>
+            </Link>
 
             {/* Mobile Menu Button */}
             <button
@@ -141,6 +142,8 @@ function Admin() {
                 Days Report
               </Link>
 
+              <LogoutButton />
+
             </div>
           </div>
 
@@ -189,6 +192,10 @@ function Admin() {
               >
                 Days Report
               </Link>
+
+              <div className="pt-2 border-t border-green-800/20">
+                <LogoutButton />
+              </div>
 
             </div>
           )}

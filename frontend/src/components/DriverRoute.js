@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Api from "../api/Api";
 import { toast } from "react-toastify";
+import LogoutButton from "./LogoutButton";
 
 export default function DriverRoute() {
 
@@ -209,19 +210,31 @@ export default function DriverRoute() {
     <div className="min-h-screen bg-[#4CBB17]/20">
 
       {/* Header */}
-      <div className="bg-[#4CBB17]/40 px-8 py-1 shadow">
-        <h1 className="flex items-center gap-3 text-5xl font-extrabold text-green-900">
-          <img
-            src="/garbageVehicle.jpeg"
-            alt=""
-            className="w-16 h-16 object-contain"
-          />
-          CleanTrack
-        </h1>
+      <div className="bg-[#4CBB17]/40 px-4 py-3 sm:px-8 shadow flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/" className="cursor-pointer hover:opacity-90 transition block" title="Go to Home">
+          <h1 className="flex items-center gap-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-green-900">
+            <img
+              src="/garbageVehicle.jpeg"
+              alt="CleanTrack"
+              className="w-12 h-12 lg:w-16 lg:h-16 object-contain"
+            />
+            CleanTrack
+          </h1>
 
-        <p className="text-gray-900 p-2">
-          Smart Waste Management Control Center
-        </p>
+          <p className="text-gray-900 text-xs sm:text-sm md:text-base mt-1">
+            Smart Waste Management Control Center
+          </p>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <Link
+            to="/driver-dashboard"
+            className="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded-xl transition shadow text-sm sm:text-base"
+          >
+            Driver Dashboard
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       {/* Live Tracking Banner */}
